@@ -1,0 +1,8 @@
+strap_in
+    trick stunt = 360;
+    trick num_of_spins = 4;
+    spin (num_of_spins times) 
+    {
+        shout(stunt + " spin!");
+    }
+unstrap

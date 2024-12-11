@@ -1,0 +1,11 @@
+strap_in
+    trick speed = 8;
+    carve (speed > 10) 
+    {
+        shout("Fast ride! Your speed is " + speed);
+    } 
+    carve (speed <= 10) 
+    {
+        shout("Slow ride!");
+    }
+unstrap

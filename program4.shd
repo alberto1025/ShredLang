@@ -1,0 +1,15 @@
+strap_in
+    trick speed = 10 + 3;
+    carve (speed > 10) 
+    {
+        shout("Fast ride! Your speed is " + speed);
+    } 
+    carve (speed <= 10) 
+    {
+        shout("Slow ride!");
+    }
+
+    spin(2 times){
+        shout("Yooo spinning with " + speed + " speed! Spin #" + spin_iteration + " done!");
+    }
+unstrap

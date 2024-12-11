@@ -1,0 +1,65 @@
+strap_in
+trick speed = 10;
+trick limit = 50;
+unstrap
+
+strap_in
+shout("Hello, slopes!");
+unstrap
+
+strap_in
+trick speed = 10;
+speed: speed + 20;
+shout("Speed: " + speed);
+unstrap
+
+strap_in
+ride (3 times) {
+    shout("Loop iteration");
+}
+unstrap
+
+strap_in
+trick speed = 30;
+trick max_speed = 50;
+
+carve (speed < max_speed) {
+    shout("You are under the speed limit.");
+} carve (else) {
+    shout("Slow down!");
+}
+unstrap
+
+strap_in
+run greet(name) {
+    shout("Hello, " + name + "!");
+}
+
+greet("Alberto");
+unstrap
+
+''''''''''''''''''''''''''''''''''''''''
+Implement conditionals:
+carve (condition) {
+    // Code
+} carve (alternative_condition) {
+    // Code
+}
+
+example:
+carve (speed > 10) {
+    shout("Fast!")
+} carve (speed <= 10) {
+    shout("Slow ride!")
+}
+
+''''''''''''''''''''''''''''''''''''''''
+Implement loops:
+ride (n times) {
+    // Code
+}
+
+example: 
+ride (5 times) {
+    shout("Jumping over the rail!")
+}

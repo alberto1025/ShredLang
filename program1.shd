@@ -1,0 +1,4 @@
+strap_in
+    trick speed = 10 + 2;
+    shout("Hey! Your speed is " + speed);
+unstrap

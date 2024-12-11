@@ -1,0 +1,573 @@
+class ShredLangInterpreter:
+    def __init__(self):
+        self.variables = {}
+
+    def interpret_by_filename(self, filename):
+        with open(filename, 'r') as file:
+            code = file.read()
+        self.interpret(code)
+
+    def interpret(self, code):
+        lines = code.splitlines()
+        statements = self.parse_statements(lines)
+        self.execute_statements(statements)
+
+    def parse_statements(self, lines):
+        statements = []
+        i = 0
+        while i < len(lines):
+            line = lines[i].strip()
+            if line.startswith("trick"):
+                parts = line.split()
+                name = parts[1]
+                value = self.parse_expression(" ".join(parts[3:]).rstrip(";"))
+                statements.append({
+                    "type": "trick",
+                    "name": name,
+                    "value": value
+                })
+            elif line.startswith("shout"):
+                message = self.parse_expression(line[line.index("(") + 1:line.rindex(")")])
+                statements.append({
+                    "type": "shout",
+                    "message": message
+                })
+            elif line.startswith("carve"):
+                condition = self.parse_expression(line[line.index("(") + 1:line.rindex(")")])
+                block_lines = []
+                i += 1
+                while i < len(lines) and lines[i].strip() == "{":
+                    i += 1
+                brace_count = 1
+                while i < len(lines) and brace_count > 0:
+                    inner_line = lines[i].strip()
+                    if inner_line == "{":
+                        brace_count += 1
+                    elif inner_line == "}":
+                        brace_count -= 1
+                    if brace_count > 0:
+                        block_lines.append(inner_line)
+                    i += 1
+                i -= 1
+                statements.append({
+                    "type": "carve",
+                    "condition": condition,
+                    "block": self.parse_statements(block_lines),
+                })
+            elif line in ["strap_in", "unstrap", "{", "}"]:
+                pass  # Ignore these control keywords
+            elif line == "":
+                pass  # Ignore empty lines
+            else:
+                raise ValueError(f"Unknown statement: {line}")
+            i += 1
+        return statements
+
+    def execute_statements(self, statements):
+        for statement in statements:
+            self.execute_statement(statement)
+
+    def execute_statement(self, statement):
+        if statement["type"] == "trick":
+            self.variables[statement["name"]] = self.evaluate_expression(statement["value"])
+        elif statement["type"] == "shout":
+            print(self.evaluate_expression(statement["message"]))
+        elif statement["type"] == "carve":
+            condition = self.evaluate_expression(statement["condition"])
+            if condition:
+                self.execute_statements(statement["block"])
+        else:
+            raise ValueError(f"Unknown statement type: {statement['type']}")
+
+    def evaluate_expression(self, expr):
+        if isinstance(expr, str):
+            if expr.isdigit():
+                return int(expr)
+            elif expr.startswith('"') and expr.endswith('"'):
+                return expr[1:-1]  # Remove surrounding quotes
+            elif expr in self.variables:
+                return self.variables[expr]
+            else:
+                raise ValueError(f"Unknown token: {expr}")
+        elif isinstance(expr, list):
+            if len(expr) == 1:
+                return self.evaluate_expression(expr[0])
+            try:
+                operator_index = next(i for i, x in enumerate(expr) if x in ["+", "-", ">", "<", ">=", "<=", "==", "!="])
+            except StopIteration:
+                raise ValueError(f"Invalid expression: {expr}")
+            left_value = self.evaluate_expression(expr[:operator_index])
+            operator = expr[operator_index]
+            right_value = self.evaluate_expression(expr[operator_index + 1:])
+            if operator == "+":
+                # Handle string concatenation
+                return str(left_value) + str(right_value)
+            elif operator == "-":
+                return left_value - right_value
+            elif operator == ">":
+                return left_value > right_value
+            elif operator == "<":
+                return left_value < right_value
+            elif operator == ">=":
+                return left_value >= right_value
+            elif operator == "<=":
+                return left_value <= right_value
+            elif operator == "==":
+                return left_value == right_value
+            elif operator == "!=":
+                return left_value != right_value
+            else:
+                raise ValueError(f"Unknown operator: {operator}")
+        else:
+            raise ValueError(f"Unknown expression: {expr}")
+
+    def parse_expression(self, expr):
+        tokens = []
+        current_token = ""
+        in_string = False
+        i = 0
+        while i < len(expr):
+            char = expr[i]
+            if char == '"' and not in_string:
+                in_string = True
+                current_token += char
+            elif char == '"' and in_string:
+                in_string = False
+                current_token += char
+                tokens.append(current_token)
+                current_token = ""
+            elif in_string:
+                current_token += char
+            elif char in "()+-*/><=! ":
+                if current_token:
+                    tokens.append(current_token)
+                    current_token = ""
+                if char in "><=!":
+                    if i + 1 < len(expr) and expr[i + 1] == "=":  # Handle multi-character operators
+                        tokens.append(char + "=")
+                        i += 1
+                    else:
+                        tokens.append(char)
+                elif char.strip():
+                    tokens.append(char)
+            else:
+                current_token += char
+            i += 1
+        if current_token:
+            tokens.append(current_token)
+        return [token for token in tokens if token.strip()]
+
+if __name__ == "__main__":
+    interpreter = ShredLangInterpreter()
+    interpreter.interpret_by_filename("program1.shd")
+
+
+
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+class ShredLangInterpreter:
+    def __init__(self):
+        self.variables = {}
+
+    def interpret_by_filename(self, filename):
+        with open(filename, 'r') as file:
+            code = file.read()
+        self.interpret(code)
+
+    def interpret(self, code):
+        lines = code.splitlines()
+        statements = self.parse_statements(lines)
+        self.execute_statements(statements)
+
+    def parse_statements(self, lines):
+        statements = []
+        i = 0
+        while i < len(lines):
+            line = lines[i].strip()
+            if line.startswith("trick"):
+                parts = line.split()
+                name = parts[1]
+                value = self.parse_expression(" ".join(parts[3:]).rstrip(";"))
+                statements.append({
+                    "type": "trick",
+                    "name": name,
+                    "value": value
+                })
+            elif line.startswith("shout"):
+                message = self.parse_expression(line[line.index("(") + 1:line.rindex(")")])
+                statements.append({
+                    "type": "shout",
+                    "message": message
+                })
+            elif line.startswith("carve"):
+                condition = self.parse_expression(line[line.index("(") + 1:line.rindex(")")])
+                block_lines = []
+                i += 1
+                while i < len(lines) and lines[i].strip() == "{":
+                    i += 1
+                brace_count = 1
+                while i < len(lines) and brace_count > 0:
+                    inner_line = lines[i].strip()
+                    if inner_line == "{":
+                        brace_count += 1
+                    elif inner_line == "}":
+                        brace_count -= 1
+                    if brace_count > 0:
+                        block_lines.append(inner_line)
+                    i += 1
+                i -= 1
+                statements.append({
+                    "type": "carve",
+                    "condition": condition,
+                    "block": self.parse_statements(block_lines),
+                })
+            elif line.startswith("spin"):
+                parts = line[line.index("(") + 1:line.rindex(")")].split()
+                loop_count = self.parse_expression(parts[0])
+                block_lines = []
+                i += 1
+                while i < len(lines) and lines[i].strip() == "{":
+                    i += 1
+                brace_count = 1
+                while i < len(lines) and brace_count > 0:
+                    inner_line = lines[i].strip()
+                    if inner_line == "{":
+                        brace_count += 1
+                    elif inner_line == "}":
+                        brace_count -= 1
+                    if brace_count > 0:
+                        block_lines.append(inner_line)
+                    i += 1
+                i -= 1
+                statements.append({
+                    "type": "spin",
+                    "loop_count": loop_count,
+                    "block": self.parse_statements(block_lines),
+                })
+            elif line in ["strap_in", "unstrap", "{", "}"]:
+                pass
+            elif line == "":
+                pass
+            else:
+                raise ValueError(f"Unknown statement: {line}")
+            i += 1
+        return statements
+
+    def execute_statements(self, statements):
+        for statement in statements:
+            self.execute_statement(statement)
+
+    def execute_statement(self, statement):
+        if statement["type"] == "trick":
+            self.variables[statement["name"]] = self.evaluate_expression(statement["value"])
+        elif statement["type"] == "shout":
+            print(self.evaluate_expression(statement["message"]))
+        elif statement["type"] == "carve":
+            condition = self.evaluate_expression(statement["condition"])
+            if condition:
+                self.execute_statements(statement["block"])
+        elif statement["type"] == "spin":
+            loop_count = self.evaluate_expression(statement["loop_count"])
+            if not isinstance(loop_count, int):
+                raise ValueError(f"Loop count must be an integer. Got: {loop_count}")
+            for iteration in range(1, loop_count + 1):
+                self.variables["spin_iteration"] = iteration
+                self.execute_statements(statement["block"])
+            del self.variables["spin_iteration"]  # Clean up after loop
+        else:
+            raise ValueError(f"Unknown statement type: {statement['type']}")
+
+    def evaluate_expression(self, expr):
+        if isinstance(expr, str):
+            if expr.isdigit():
+                return int(expr)
+            elif expr.startswith('"') and expr.endswith('"'):
+                return expr[1:-1]
+            elif expr in self.variables:
+                return self.variables[expr]
+            else:
+                raise ValueError(f"Unknown token: {expr}")
+        elif isinstance(expr, list):
+            if len(expr) == 1:
+                return self.evaluate_expression(expr[0])
+            try:
+                operator_index = next(i for i, x in enumerate(expr) if x in ["+", "-", ">", "<", ">=", "<=", "==", "!="])
+            except StopIteration:
+                raise ValueError(f"Invalid expression: {expr}")
+            left_value = self.evaluate_expression(expr[:operator_index])
+            operator = expr[operator_index]
+            right_value = self.evaluate_expression(expr[operator_index + 1:])
+            if operator == "+":
+                if isinstance(left_value, str) or isinstance(right_value, str):
+                    return str(left_value) + str(right_value)
+                return left_value + right_value
+            elif operator == "-":
+                return left_value - right_value
+            elif operator == ">":
+                return left_value > right_value
+            elif operator == "<":
+                return left_value < right_value
+            elif operator == ">=":
+                return left_value >= right_value
+            elif operator == "<=":
+                return left_value <= right_value
+            elif operator == "==":
+                return left_value == right_value
+            elif operator == "!=":
+                return left_value != right_value
+            else:
+                raise ValueError(f"Unknown operator: {operator}")
+        else:
+            raise ValueError(f"Unknown expression: {expr}")
+
+    def parse_expression(self, expr):
+        tokens = []
+        current_token = ""
+        in_string = False
+        i = 0
+        while i < len(expr):
+            char = expr[i]
+            if char == '"' and not in_string:
+                in_string = True
+                current_token += char
+            elif char == '"' and in_string:
+                in_string = False
+                current_token += char
+                tokens.append(current_token)
+                current_token = ""
+            elif in_string:
+                current_token += char
+            elif char in "()+-*/><=! ":
+                if current_token:
+                    tokens.append(current_token)
+                    current_token = ""
+                if char in "><=!":
+                    if i + 1 < len(expr) and expr[i + 1] == "=":
+                        tokens.append(char + "=")
+                        i += 1
+                    else:
+                        tokens.append(char)
+                elif char.strip():
+                    tokens.append(char)
+            else:
+                current_token += char
+            i += 1
+        if current_token:
+            tokens.append(current_token)
+        return [token for token in tokens if token.strip()]
+
+if __name__ == "__main__":
+    interpreter = ShredLangInterpreter()
+    interpreter.interpret_by_filename("program1.shd")
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+class ShredLangInterpreter:
+    def __init__(self):
+        self.variables = {}
+
+    def interpret_by_filename(self, filename):
+        with open(filename, 'r') as file:
+            code = file.read()
+        self.interpret(code)
+
+    def interpret(self, code):
+        lines = code.splitlines()
+        statements = self.parse_statements(lines)
+        self.execute_statements(statements)
+
+    def parse_statements(self, lines):
+        statements = []
+        i = 0
+        while i < len(lines):
+            line = lines[i].strip()
+            if line.startswith("trick"):
+                parts = line.split()
+                name = parts[1]
+                value = self.parse_expression(" ".join(parts[3:]).rstrip(";"))
+                statements.append({
+                    "type": "trick",
+                    "name": name,
+                    "value": value
+                })
+            elif "=" in line and line.endswith(";"):
+                # Handle variable reassignment
+                name, value = map(str.strip, line.split("=", 1))
+                value = self.parse_expression(value.rstrip(";"))
+                statements.append({
+                    "type": "assignment",
+                    "name": name,
+                    "value": value
+                })
+            elif line.startswith("shout"):
+                message = self.parse_expression(line[line.index("(") + 1:line.rindex(")")])
+                statements.append({
+                    "type": "shout",
+                    "message": message
+                })
+            elif line.startswith("carve"):
+                condition = self.parse_expression(line[line.index("(") + 1:line.rindex(")")])
+                block_lines = []
+                i += 1
+                while i < len(lines) and lines[i].strip() == "{":
+                    i += 1
+                brace_count = 1
+                while i < len(lines) and brace_count > 0:
+                    inner_line = lines[i].strip()
+                    if inner_line == "{":
+                        brace_count += 1
+                    elif inner_line == "}":
+                        brace_count -= 1
+                    if brace_count > 0:
+                        block_lines.append(inner_line)
+                    i += 1
+                statements.append({
+                    "type": "carve",
+                    "condition": condition,
+                    "block": self.parse_statements(block_lines),
+                })
+                i -= 1  # Adjust for loop increment
+            elif line.startswith("spin"):
+                parts = line[line.index("(") + 1:line.rindex(")")].strip().split()
+                if len(parts) != 2 or parts[1] != "times":
+                    raise ValueError(f"Invalid spin statement syntax: {line}")
+                loop_count = self.parse_expression(parts[0])
+                block_lines = []
+                i += 1
+                while i < len(lines) and lines[i].strip() == "{":
+                    i += 1
+                brace_count = 1
+                while i < len(lines) and brace_count > 0:
+                    inner_line = lines[i].strip()
+                    if inner_line == "{":
+                        brace_count += 1
+                    elif inner_line == "}":
+                        brace_count -= 1
+                    if brace_count > 0:
+                        block_lines.append(inner_line)
+                    i += 1
+                statements.append({
+                    "type": "spin",
+                    "loop_count": loop_count,
+                    "block": self.parse_statements(block_lines),
+                })
+                i -= 1  # Adjust for loop increment
+            elif line in ["strap_in", "unstrap", "{", "}"]:
+                pass  # Ignore these control keywords
+            elif line == "":
+                pass  # Ignore empty lines
+            else:
+                raise ValueError(f"Unknown statement: {line}")
+            i += 1
+        return statements
+
+    def execute_statements(self, statements):
+        for statement in statements:
+            self.execute_statement(statement)
+
+    def execute_statement(self, statement):
+        if statement["type"] == "trick":
+            self.variables[statement["name"]] = self.evaluate_expression(statement["value"])
+        elif statement["type"] == "assignment":
+            if statement["name"] not in self.variables:
+                raise ValueError(f"Variable '{statement['name']}' not declared before assignment.")
+            self.variables[statement["name"]] = self.evaluate_expression(statement["value"])
+        elif statement["type"] == "shout":
+            print(self.evaluate_expression(statement["message"]))
+        elif statement["type"] == "carve":
+            condition = self.evaluate_expression(statement["condition"])
+            if condition:
+                self.execute_statements(statement["block"])
+        elif statement["type"] == "spin":
+            loop_count = self.evaluate_expression(statement["loop_count"])
+            if not isinstance(loop_count, int):
+                raise ValueError(f"Loop count must be an integer. Got: {loop_count}")
+            for iteration in range(1, loop_count + 1):
+                self.variables["spin_iteration"] = iteration
+                self.execute_statements(statement["block"])
+            del self.variables["spin_iteration"]  # Clean up after loop
+        else:
+            raise ValueError(f"Unknown statement type: {statement['type']}")
+
+    def evaluate_expression(self, expr):
+        if isinstance(expr, str):
+            if expr.isdigit():
+                return int(expr)
+            elif expr.startswith('"') and expr.endswith('"'):
+                return expr[1:-1]
+            elif expr in self.variables:
+                return self.variables[expr]
+            else:
+                raise ValueError(f"Unknown token: {expr}")
+        elif isinstance(expr, list):
+            if len(expr) == 1:
+                return self.evaluate_expression(expr[0])
+            try:
+                operator_index = next(i for i, x in enumerate(expr) if x in ["+", "-", ">", "<", ">=", "<=", "==", "!="])
+            except StopIteration:
+                raise ValueError(f"Invalid expression: {expr}")
+            left_value = self.evaluate_expression(expr[:operator_index])
+            operator = expr[operator_index]
+            right_value = self.evaluate_expression(expr[operator_index + 1:])
+            if operator == "+":
+                if isinstance(left_value, str) or isinstance(right_value, str):
+                    return str(left_value) + str(right_value)
+                return left_value + right_value
+            elif operator == "-":
+                return left_value - right_value
+            elif operator == ">":
+                return left_value > right_value
+            elif operator == "<":
+                return left_value < right_value
+            elif operator == ">=":
+                return left_value >= right_value
+            elif operator == "<=":
+                return left_value <= right_value
+            elif operator == "==":
+                return left_value == right_value
+            elif operator == "!=":
+                return left_value != right_value
+            else:
+                raise ValueError(f"Unknown operator: {operator}")
+        else:
+            raise ValueError(f"Unknown expression: {expr}")
+
+    def parse_expression(self, expr):
+        tokens = []
+        current_token = ""
+        in_string = False
+        i = 0
+        while i < len(expr):
+            char = expr[i]
+            if char == '"' and not in_string:
+                in_string = True
+                current_token += char
+            elif char == '"' and in_string:
+                in_string = False
+                current_token += char
+                tokens.append(current_token)
+                current_token = ""
+            elif in_string:
+                current_token += char
+            elif char in "()+-*/><=! ":
+                if current_token:
+                    tokens.append(current_token)
+                    current_token = ""
+                if char in "><=!":
+                    if i + 1 < len(expr) and expr[i + 1] == "=":
+                        tokens.append(char + "=")
+                        i += 1
+                    else:
+                        tokens.append(char)
+                elif char.strip():
+                    tokens.append(char)
+            else:
+                current_token += char
+            i += 1
+        if current_token:
+            tokens.append(current_token)
+        return [token for token in tokens if token.strip()]
+
+if __name__ == "__main__":
+    interpreter = ShredLangInterpreter()
+    interpreter.interpret_by_filename("program5.shd")

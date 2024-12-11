@@ -1,0 +1,23 @@
+strap_in
+    trick speed = 5;
+    spin(3 times)
+    {
+        carve(spin_iteration == 1)
+        {
+            shout("Yooo spinning with " + speed + " speed! Spin #" + spin_iteration + " done!");
+        }
+
+        carve(spin_iteration > 1)
+        {
+            shout("This ain't my first time shredding the slopes, this is my spin number " + spin_iteration + "!");
+        }
+    }
+
+    speed = 20;
+    carve(speed > 15)
+    {
+        bail("Error! Speed is too high! Shredding aborted.");
+    }
+
+    shout("Speed is within safe limits: " + speed);
+unstrap
