@@ -37,3 +37,6 @@ unstrap
    "git clone https://github.com/alberto1025/ShredLang.git" then
    "cd ShredLang"
 2. Run the interpreter with a .shd program
+
+# Link to website 🖥️
+http://127.0.0.1:5500/index.html
