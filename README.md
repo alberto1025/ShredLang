@@ -34,6 +34,6 @@ unstrap
 ```
 # How to Run 🚀
 1. Clone this repository:
-   git clone https://github.com/alberto1025/ShredLang.git
-   cd ShredLang
+   "git clone https://github.com/alberto1025/ShredLang.git" then
+   "cd ShredLang"
 2. Run the interpreter with a .shd program
